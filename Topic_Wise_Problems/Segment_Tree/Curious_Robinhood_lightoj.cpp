@@ -2,10 +2,10 @@
 #include <math.h>
 using namespace std;
 
-#define mx 100001
-#define ll long long int
+// #define mx 100005
+const int mx=1e5+5;
 int arr[mx];
-ll tree[mx*4];
+int tree[mx*4];
 
 void init(int node, int b, int e)
 {
@@ -13,25 +13,25 @@ void init(int node, int b, int e)
         tree[node] = arr[b];
         return;
     }
-    int left = node*2;
-    int right = node*2+1;
-    int mid = (b+e)/2;
+    int left = node << 1;
+    int right = left+1;
+    int mid = (b+e) >> 1;
     init(left, b, mid);
     init(right, mid+1, e);
     tree[node] = tree[left] + tree[right];
 }
 
-ll query(int node, int b, int e, int i, int j)
+int query(int node, int b, int e, int i, int j)
 {
     if(i>e || j<b)
         return 0;
     if(b>=i && e<=j)
         return tree[node];
-    int left = node*2;
-    int right = node*2 +1;
-    int mid = (b+e)/2;
-    ll p1 = query(left, b, mid, i, j);
-    ll p2 = query(right, mid+1, e, i, j);
+    int left = node<<1;
+    int right = left +1;
+    int mid = (b+e) >> 1;
+    int p1 = query(left, b, mid, i, j);
+    int p2 = query(right, mid+1, e, i, j);
     return p1+p2;
 }
 
@@ -40,6 +40,7 @@ void update(int node, int b, int e, int i, int newValue)
     if(i>e || i<b) return;
     if(b>=i && e<=i) {
         tree[node] = newValue;
+        arr[i] = newValue;
         // printf("updated value %d\n", tree[node]);
         return;
     }
@@ -61,35 +62,30 @@ int main() {
             scanf("%d", &arr[i]); 
         }
         init(1,1,n);
-
-        int height = ceil(log2(n));
-        int lastIndex = pow(2, height+1);
-        printf("height: %d\t last index: %d\n", height, lastIndex);
-
-        printf("Printing Segment tree\n");
-        for(int i=1; i<=lastIndex; i++){
-            printf("%d ", tree[i]);
-        }
-        printf("\n");
-
         
         printf("Case %d:\n", caseNo);
 
         for(int i=0; i<q; i++) {
-            int op,j,k;
+            int op;
             scanf("%d", &op);
             if(op==1) {
+                int j;
                 scanf("%d", &j);
-                printf("%d\n", arr[j+1]);
-                update(1, 1, n, j+1, 0);
+                j++;
+                printf("%d\n", arr[j]);
+                update(1, 1, n, j, 0);
             }
             else if(op==2) {
-                scanf("%d %d", &j, &k);
-                update(1, 1, n, j+1, k+arr[j+1]);
+                int j, value;
+                scanf("%d %d", &j, &value);
+                j++;
+                update(1, 1, n, j, value+arr[j]);
             }
             else if(op==3) {
+                int j, k;
                 scanf("%d %d", &j, &k);
-                printf("%lld\n", query(1, 1, n, j+1, k+1));
+                j++; k++;
+                printf("%d\n", query(1, 1, n, j, k));
             }
         }
     }
